@@ -1,0 +1,16 @@
+@Server_HostAddress = http://localhost:5247
+
+GET {{Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{Server_HostAddress}}/api/pdf/create-pdf/
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "receiptId": "123452345",
+  "price1": 10.50,
+  "price2": 20.50
+}

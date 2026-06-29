@@ -1,0 +1,52 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<EditForm Model="formPdf" OnSubmit="createAndDownloadPdf">
+    <InputText @bind-value="formPdf.Name" placeholder="Name" />
+    <InputText @bind-value="formPdf.ReceiptId" placeholder="Receipt Id" />
+    <InputNumber @bind-value="formPdf.Price1" placeholder="Price 1" />
+    <InputNumber @bind-value="formPdf.Price2" placeholder="Price 2" />
+
+    <button type="submit">Download PDF</button>
+</EditForm>
+
+@code {
+
+    public class FormPdf
+    {
+        public string Name { get; set; } = string.Empty;
+        public string ReceiptId { get; set; } = string.Empty;
+        public decimal Price1 { get; set; } = 0;
+        public decimal Price2 { get; set; } = 0;
+    }
+
+    private FormPdf formPdf = new FormPdf();
+
+    private async Task createAndDownloadPdf()
+    {
+        var response = await Http.PostAsJsonAsync("api/pdf/create-pdf", formPdf);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var getResponse = await Http.GetAsync("api/pdf/fetch-pdf");
+
+            if (getResponse.IsSuccessStatusCode)
+            {
+                var pdfBytes = await getResponse.Content.ReadAsByteArrayAsync();
+                var base64 = Convert.ToBase64String(pdfBytes);
+
+                // Chama o JS para baixar
+                await JS.InvokeVoidAsync("downloadFile", base64, "newPdf.pdf");
+            }
+            else
+            {
+                Console.WriteLine("Erro ao buscar o PDF.");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Erro ao criar PDF");
+        }
+    }
+}
